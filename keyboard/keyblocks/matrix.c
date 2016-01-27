@@ -1,11 +1,6 @@
 /*
 
-Note for ErgoDox EZ customizers: Here be dragons!
-This is not a file you want to be messing with.
-All of the interesting stuff for you is under keymaps/ :)
-Love, Erez
-
-Copyright 2013 Oleg Kostyuk <cub.uanic@gmail.com>
+Copyright 2016 Josh Black for Machine Industries <josh@machineindustries.co>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -55,6 +50,8 @@ static void select_row(uint8_t row);
 
 static uint8_t mcp23018_reset_loop;
 
+static uint8_t mcp_status_array[8];
+
 #ifdef DEBUG_MATRIX_SCAN_RATE
 uint32_t matrix_timer;
 uint32_t matrix_scan_count;
@@ -85,7 +82,7 @@ void matrix_init(void)
 {
     // initialize row and col
 
-    mcp23018_status = init_mcp23018();
+    init_mcp23018(mcp_status_array, sizeof mcp_status_array);
 
 
     unselect_rows();
@@ -115,7 +112,7 @@ uint8_t matrix_scan(void)
             // since mcp23018_reset_loop is 8 bit - we'll try to reset once in 255 matrix scans
             // this will be approx bit more frequent than once per second
             print("trying to reset mcp23018\n");
-            mcp23018_status = init_mcp23018();
+            init_mcp23018(mcp_status_array, sizeof mcp_status_array);
             if (mcp23018_status) {
                 print("MCP23018 not responding\n");
             } else {

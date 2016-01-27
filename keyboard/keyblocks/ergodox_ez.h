@@ -28,10 +28,11 @@ extern uint8_t i2c_addr_array[8];
 #define OLATB           0x15
 
 extern uint8_t mcp23018_status;
+// status uint8_t mcp_status_arr[8];
 
 void init_ergodox(void);
 void ergodox_blink_all_leds(void);
-uint8_t init_mcp23018(void);
+void init_mcp23018(uint8_t *mcp_status_arr, size_t mcp_status_arr_size);
 uint8_t ergodox_left_leds_update(void);
 
 #define LED_BRIGHTNESS_LO       15
