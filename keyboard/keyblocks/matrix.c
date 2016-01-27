@@ -316,13 +316,13 @@ static void unselect_rows(void)
         for (uint8_t i=0; i<expanders_connected; i++) {
             uint8_t addr_from_arr = i2c_addr_array[i];
             uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
-            mcp23018_status = i2c_start(addr_to_write);     if (mcp23018_status) goto out;
-            mcp23018_status = i2c_write(GPIOA);             if (mcp23018_status) goto out;
+            mcp23018_status = i2c_start(addr_to_write);     if (mcp23018_status) goto out0;
+            mcp23018_status = i2c_write(GPIOA);             if (mcp23018_status) goto out0;
             mcp23018_status = i2c_write( 0xFF
                                 & ~(0<<7)
-                            );                              if (mcp23018_status) goto out;
+                            );                              if (mcp23018_status) goto out0;
         }
-    out:
+    out0:
         i2c_stop();
     }
 
@@ -338,65 +338,78 @@ static void unselect_rows(void)
 
 static void select_row(uint8_t row)
 {
-    if (row > 8) {
+    switch (row) {
         // select on mcp23018
-        if (mcp23018_status) { // if there was an error
-            // do nothing
-        } else {
-            // set active row low  : 0
-            // set other rows hi-Z : 1
-            for (uint8_t i=0; i<expanders_connected; i++) {
-                uint8_t addr_from_arr = i2c_addr_array[i];
-                uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
-                mcp23018_status = i2c_start(addr_to_write);         if (mcp23018_status) goto out;
-                mcp23018_status = i2c_write(GPIOA);                 if (mcp23018_status) goto out;
-                mcp23018_status = i2c_write( 0xFF & ~(1<<row)
-                                      & ~(0<<7)
-                                  );                                if (mcp23018_status) goto out;
+        case 0 ... 7:
+            if (mcp23018_status) { // if there was an error
+                // do nothing
+            } else {
+                // set active row low  : 0
+                // set other rows hi-Z : 1
+                    uint8_t addr_from_arr = i2c_addr_array[0];
+                    uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
+                    mcp23018_status = i2c_start(addr_to_write);         
+                    if (mcp23018_status) goto out1;
+                    mcp23018_status = i2c_write(GPIOA);                 
+                    if (mcp23018_status) goto out1;
+                    mcp23018_status = i2c_write( 0xFF & ~(1<<row) & ~(0<<7) );                                
+                    if (mcp23018_status) goto out1;
+            out1:
+                i2c_stop();
             }
-        out:
-            i2c_stop();
-        }
-    } 
-
-
-    else {
+            break;
         // select on teensy
         // Output low(DDR:1, PORT:0) to select
-        switch (row) {
-            case 8:
-                DDRB  |= (1<<0);
-                PORTB &= ~(1<<0);
-                break;
-            case 9:
-                DDRB  |= (1<<1);
-                PORTB &= ~(1<<1);
-                break;
-            case 10:
-                DDRB  |= (1<<2);
-                PORTB &= ~(1<<2);
-                break;
-            case 11:
-                DDRB  |= (1<<3);
-                PORTB &= ~(1<<3);
-                break;
-            case 12:
-                DDRD  |= (1<<2);
-                PORTD &= ~(1<<2);
-                break;
-            case 13:
-                DDRD  |= (1<<3);
-                PORTD &= ~(1<<3);
-                break;
-            case 14:
-                DDRC  |= (1<<6);
-                PORTC &= ~(1<<6);
-                break;
-            case 15:
-                DDRC  |= (1<<7);
-                PORTC &= ~(1<<7);
-                break;
-        }
+        case 8:
+            DDRB  |= (1<<0);
+            PORTB &= ~(1<<0);
+            break;
+        case 9:
+            DDRB  |= (1<<1);
+            PORTB &= ~(1<<1);
+            break;
+        case 10:
+            DDRB  |= (1<<2);
+            PORTB &= ~(1<<2);
+            break;
+        case 11:
+            DDRB  |= (1<<3);
+            PORTB &= ~(1<<3);
+            break;
+        case 12:
+            DDRD  |= (1<<2);
+            PORTD &= ~(1<<2);
+            break;
+        case 13:
+            DDRD  |= (1<<3);
+            PORTD &= ~(1<<3);
+            break;
+        case 14:
+            DDRC  |= (1<<6);
+            PORTC &= ~(1<<6);
+            break;
+        case 15:
+            DDRC  |= (1<<7);
+            PORTC &= ~(1<<7);
+            break;
+        case 16 ... 23:
+            if (mcp23018_status) { // if there was an error
+                // do nothing
+            } else {
+                // set active row low  : 0
+                // set other rows hi-Z : 1
+                    uint8_t addr_from_arr = i2c_addr_array[1];
+                    uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
+                    mcp23018_status = i2c_start(addr_to_write);         
+                    if (mcp23018_status) goto out2;
+                    mcp23018_status = i2c_write(GPIOA);                 
+                    if (mcp23018_status) goto out2;
+                    mcp23018_status = i2c_write( 0xFF & ~(1<<row) & ~(0<<7) );                                
+                    if (mcp23018_status) goto out2;
+            out2:
+                i2c_stop();
+            }
+            break;
     }
 }
 
