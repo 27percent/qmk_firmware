@@ -96,7 +96,15 @@ inline void ergodox_led_all_set(uint8_t n)
       k12A, k12B, k12C, k12D, k12E, k12F, k12G, k12H, \
       k13A, k13B, k13C, k13D, k13E, k13F, k13G, k13H, \
       k14A, k14B, k14C, k14D, k14E, k14F, k14G, k14H, \
-      k15A, k15B, k15C, k15D, k15E, k15F, k15G, k15H  \
+      k15A, k15B, k15C, k15D, k15E, k15F, k15G, k15H, \
+      k16A, k16B, k16C, k16D, k16E, k16F, k16G, k16H, \
+      k17A, k17B, k17C, k17D, k17E, k17F, k17G, k17H, \
+      k18A, k18B, k18C, k18D, k18E, k18F, k18G, k18H, \
+      k19A, k19B, k19C, k19D, k19E, k19F, k19G, k19H, \
+      k20A, k20B, k20C, k20D, k20E, k20F, k20G, k20H, \
+      k21A, k21B, k21C, k21D, k21E, k21F, k21G, k21H, \
+      k22A, k22B, k22C, k22D, k22E, k22F, k22G, k22H, \
+      k23A, k23B, k23C, k23D, k23E, k23F, k23G, k23H  \
 ) \
 { \
     { k00A, k00B, k00C, k00D, k00E, k00F, k00G, k00H }, \
@@ -114,7 +122,15 @@ inline void ergodox_led_all_set(uint8_t n)
     { k12A, k12B, k12C, k12D, k12E, k12F, k12G, k12H }, \
     { k13A, k13B, k13C, k13D, k13E, k13F, k13G, k13H }, \
     { k14A, k14B, k14C, k14D, k14E, k14F, k14G, k14H }, \
-    { k15A, k15B, k15C, k15D, k15E, k15F, k15G, k15H }  \
+    { k15A, k15B, k15C, k15D, k15E, k15F, k15G, k15H }, \
+    { k16A, k16B, k16C, k16D, k16E, k16F, k16G, k16H }, \
+    { k17A, k17B, k17C, k17D, k17E, k17F, k17G, k17H }, \
+    { k18A, k18B, k18C, k18D, k18E, k18F, k18G, k18H }, \
+    { k19A, k19B, k19C, k19D, k19E, k19F, k19G, k19H }, \
+    { k20A, k20B, k20C, k20D, k20E, k20F, k20G, k20H }, \
+    { k21A, k21B, k21C, k21D, k21E, k21F, k21G, k21H }, \
+    { k22A, k22B, k22C, k22D, k22E, k22F, k22G, k22H }, \
+    { k23A, k23B, k23C, k23D, k23E, k23F, k23G, k23H }  \
 } 
 
 // #define KEYMAP( \

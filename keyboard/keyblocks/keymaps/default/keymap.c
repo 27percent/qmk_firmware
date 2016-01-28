@@ -27,7 +27,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_X,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
     KC_Y,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
     KC_Z,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
-    KC_EQL,  KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O 
+    KC_EQL,  KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+
+    // MCP23018 chip 1
+    KC_8,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_9,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_A,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_W,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_X,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_Y,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_Z,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_EQL,  KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O  
 
     // // MCP23018 chip 3
     // KC_I,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,
@@ -109,7 +119,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_X,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
     KC_Y,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
     KC_Z,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
-    KC_EQL,  KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O
+    KC_EQL,  KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+
+    // MCP23018 chip 1
+    KC_8,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_9,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_A,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_W,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_X,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_Y,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_Z,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_EQL,  KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O 
 
     // // MCP23018 chip 3
     // KC_I,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,
@@ -191,7 +211,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_X,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
     KC_Y,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
     KC_Z,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_EQL,  KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+
+    // MCP23018 chip 1
+    KC_8,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_9,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_A,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_W,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_X,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_Y,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
+    KC_Z,    KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,
     KC_EQL,  KC_I,    KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O
+     
     // // MCP23018 chip 3
     // KC_I,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,
     // KC_J,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,

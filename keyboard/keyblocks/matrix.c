@@ -78,6 +78,48 @@ uint8_t matrix_cols(void)
     return MATRIX_COLS;
 }
 
+static void select_mcp_row(uint8_t mcp_number, uint8_t row){
+    if (mcp_status_array[mcp_number] == 1) { // if there was an error
+        // do nothing
+    } else {
+        // set active row low  : 0
+        // set other rows hi-Z : 1
+            uint8_t addr_from_arr = i2c_addr_array[mcp_number];
+            uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
+            mcp_status_array[mcp_number] = i2c_start(addr_to_write);         
+            if (mcp_status_array[mcp_number] == 1) goto out2;
+            mcp_status_array[mcp_number] = i2c_write(GPIOA);                 
+            if (mcp_status_array[mcp_number] == 1) goto out2;
+            mcp_status_array[mcp_number] = i2c_write( 0xFF & ~(1<<row) & ~(0<<7) );                                
+            if (mcp_status_array[mcp_number] == 1) goto out2;
+    out2:
+        i2c_stop();
+    }
+}
+
+static matrix_row_t read_mcp_cols(uint8_t mcp_number, uint8_t row){
+    if (mcp_status_array[mcp_number] == 1) { 
+        // if there was an error
+        return 0;
+    } else {
+        uint8_t data = 0;
+        uint8_t addr_from_arr = i2c_addr_array[mcp_number];
+        uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
+        uint8_t addr_to_read = ( (addr_from_arr<<1) | 1 );
+        mcp_status_array[mcp_number] = i2c_start(addr_to_write);    
+        if (mcp_status_array[mcp_number] == 1) goto out;
+        mcp_status_array[mcp_number] = i2c_write(GPIOB);            
+        if (mcp_status_array[mcp_number] == 1) goto out;
+        mcp_status_array[mcp_number] = i2c_start(addr_to_read);     
+        if (mcp_status_array[mcp_number] == 1) goto out;
+        data = i2c_readNak();
+        data = ~data;
+    out:
+        i2c_stop();
+        return data;
+    }
+}
+
 void matrix_init(void)
 {
     // initialize row and col
@@ -229,55 +271,10 @@ static void  init_cols(void)
     PORTD |=  (1<<5 | 1<<4);
 }
 
-static void select_mcp_row(uint8_t mcp_number, uint8_t row){
-    if (mcp_status_array[mcp_number] == 1) { // if there was an error
-        // do nothing
-    } else {
-        // set active row low  : 0
-        // set other rows hi-Z : 1
-            uint8_t addr_from_arr = i2c_addr_array[mcp_number];
-            uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
-            mcp_status_array[mcp_number] = i2c_start(addr_to_write);         
-            if (mcp_status_array[mcp_number] == 1) goto out2;
-            mcp_status_array[mcp_number] = i2c_write(GPIOA);                 
-            if (mcp_status_array[mcp_number] == 1) goto out2;
-            mcp_status_array[mcp_number] = i2c_write( 0xFF & ~(1<<row) & ~(0<<7) );                                
-            if (mcp_status_array[mcp_number] == 1) goto out2;
-    out2:
-        i2c_stop();
-    }
-}
-
-static matrix_row_t read_mcp_cols(uint8_t mcp_number, uint8_t row){
-    if (mcp_status_array[mcp_number] == 1) { 
-        // if there was an error
-        return 0;
-    } else {
-        uint8_t data = 0;
-        uint8_t addr_from_arr = i2c_addr_array[mcp_number];
-        uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
-        uint8_t addr_to_read = ( (addr_from_arr<<1) | 1 );
-        mcp_status_array[mcp_number] = i2c_start(addr_to_write);    
-        if (mcp_status_array[mcp_number] == 1) goto out;
-        mcp_status_array[mcp_number] = i2c_write(GPIOB);            
-        if (mcp_status_array[mcp_number] == 1) goto out;
-        mcp_status_array[mcp_number] = i2c_start(addr_to_read);     
-        if (mcp_status_array[mcp_number] == 1) goto out;
-        data = i2c_readNak();
-        data = ~data;
-    out:
-        i2c_stop();
-        return data;
-    }
-}
-
 static matrix_row_t read_cols(uint8_t row)
 {
     switch (row) {
         case 0 ... 7:
-            read_mcp_cols(0, row);
-            break;
-        case 8 ... 15:
             _delay_us(30);  // without this wait read unstable value.
             return
                 (PINF&(1<<0) ? 0 : (1<<0)) |
@@ -289,26 +286,29 @@ static matrix_row_t read_cols(uint8_t row)
                 (PIND&(1<<4) ? 0 : (1<<6)) |
                 (PIND&(1<<5) ? 0 : (1<<7)) ;
             break;
+        case 8 ... 15:
+            return read_mcp_cols(0, row);
+            break;
         case 16 ... 23:
-            read_mcp_cols(1, row-16);
+            return read_mcp_cols(1, row-16);
             break;
         case 24 ... 31:
-            read_mcp_cols(2, row-24);
+            return read_mcp_cols(2, row-24);
             break;
         case 32 ... 39:
-            read_mcp_cols(3, row-32);
+            return read_mcp_cols(3, row-32);
             break;
         case 40 ... 47:
-            read_mcp_cols(4, row-40);
+            return read_mcp_cols(4, row-40);
             break;
         case 48 ... 55:
-            read_mcp_cols(5, row-48);
+            return read_mcp_cols(5, row-48);
             break;
         case 56 ... 63:
-            read_mcp_cols(6, row-56);
+            return read_mcp_cols(6, row-56);
             break;
         case 64 ... 71:
-            read_mcp_cols(7, row-64);
+            return read_mcp_cols(7, row-64);
             break;
     }
 }
@@ -387,41 +387,41 @@ static void unselect_rows(void)
 static void select_row(uint8_t row)
 {
     switch (row) {
-        case 0 ... 7:
-            select_mcp_row(0,row);
-            break;
         // Output low(DDR:1, PORT:0) to select
-        case 8:
+        case 0:
             DDRB  |= (1<<0);
             PORTB &= ~(1<<0);
             break;
-        case 9:
+        case 1:
             DDRB  |= (1<<1);
             PORTB &= ~(1<<1);
             break;
-        case 10:
+        case 2:
             DDRB  |= (1<<2);
             PORTB &= ~(1<<2);
             break;
-        case 11:
+        case 3:
             DDRB  |= (1<<3);
             PORTB &= ~(1<<3);
             break;
-        case 12:
+        case 4:
             DDRD  |= (1<<2);
             PORTD &= ~(1<<2);
             break;
-        case 13:
+        case 5:
             DDRD  |= (1<<3);
             PORTD &= ~(1<<3);
             break;
-        case 14:
+        case 6:
             DDRC  |= (1<<6);
             PORTC &= ~(1<<6);
             break;
-        case 15:
+        case 7:
             DDRC  |= (1<<7);
             PORTC &= ~(1<<7);
+            break;
+        case 8 ... 15:
+            select_mcp_row(0,row-8);
             break;
         case 16 ... 23:
             select_mcp_row(1,row-16);

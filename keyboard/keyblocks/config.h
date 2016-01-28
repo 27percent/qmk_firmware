@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* key matrix size */
 // #define MATRIX_ROWS 72
-#define MATRIX_ROWS 16
+#define MATRIX_ROWS 24
 // #define MATRIX_ROWS 14
 #define MATRIX_COLS 8
 // #define MATRIX_COLS 6
