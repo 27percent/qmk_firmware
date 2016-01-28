@@ -2,8 +2,6 @@
 #include "i2cmaster.h"
 
 bool i2c_initialized = 0;
-// uint8_t mcp23018_status = 0x20;
-// uint8_t mcp_status_arr[8];
 uint8_t i2c_addr_array[8];
 uint8_t expanders_connected = 0;
 
@@ -34,8 +32,6 @@ void * matrix_init_kb(void) {
     PORTC |=  (1<<7);
     PORTD |=  (1<<7 | 1<<5 | 1<<4);
     PORTE |=  (1<<6);
-
-    ergodox_blink_all_leds();
 
     if (matrix_init_user) {
         (*matrix_init_user)();
@@ -74,8 +70,7 @@ void ergodox_blink_all_leds(void)
     ergodox_led_all_off();
 }
 
-void init_mcp23018(uint8_t *mcp_status_arr, size_t mcp_status_arr_size) {
-    // mcp23018_status = 0x20;
+void init_mcp23018(uint8_t *mcp_status_arr) {
 
     // I2C subsystem
     if (i2c_initialized == 0) {
@@ -86,15 +81,17 @@ void init_mcp23018(uint8_t *mcp_status_arr, size_t mcp_status_arr_size) {
 
     // Scan for connected MCP chips, from 0x20 to 0x27
     for (uint8_t i=0; i<8; i++) {
-        mcp_status_arr[i] = 0;
-        uint8_t test_addr = 0x20 + i;
+        mcp_status_arr[i] = 1;
+        uint8_t test_addr = 0x20 + i; // BANANA - Maybe change this, the address could be wrong
         uint8_t test_addr_write = ( (test_addr<<1) | 0 );
         uint8_t test_addr_read = ( (test_addr<<1) | 1 );
         mcp_status_arr[expanders_connected] = i2c_start(test_addr_write);
         i2c_stop();
-        if (!mcp_status_arr[expanders_connected]) {
+        if (mcp_status_arr[expanders_connected] == 0) {
             i2c_addr_array[expanders_connected] = test_addr;
             expanders_connected++;
+            // ergodox_blink_all_leds();
+            // _delay_ms(50);
         }
     } 
 
@@ -107,20 +104,20 @@ void init_mcp23018(uint8_t *mcp_status_arr, size_t mcp_status_arr_size) {
         // - unused  : input  : 1
         // - input   : input  : 1
         // - driving : output : 0
-        mcp_status_arr[i] = i2c_start(addr_to_write);     if (mcp_status_arr[i]) goto out;
-        mcp_status_arr[i] = i2c_write(IODIRA);            if (mcp_status_arr[i]) goto out;
-        mcp_status_arr[i] = i2c_write(0b00000000);        if (mcp_status_arr[i]) goto out;
-        mcp_status_arr[i] = i2c_write(0b11111111);        if (mcp_status_arr[i]) goto out;
+        mcp_status_arr[i] = i2c_start(addr_to_write);     if (mcp_status_arr[i] == 1) goto out;
+        mcp_status_arr[i] = i2c_write(IODIRA);            if (mcp_status_arr[i] == 1) goto out;
+        mcp_status_arr[i] = i2c_write(0b00000000);        if (mcp_status_arr[i] == 1) goto out;
+        mcp_status_arr[i] = i2c_write(0b11111111);        if (mcp_status_arr[i] == 1) goto out;
         i2c_stop();
 
         // set pull-up
         // - unused  : on  : 1
         // - input   : on  : 1
         // - driving : off : 0
-        mcp_status_arr[i] = i2c_start(addr_to_write);     if (mcp_status_arr[i]) goto out;
-        mcp_status_arr[i] = i2c_write(GPPUA);             if (mcp_status_arr[i]) goto out;
-        mcp_status_arr[i] = i2c_write(0b00000000);        if (mcp_status_arr[i]) goto out;
-        mcp_status_arr[i] = i2c_write(0b11111111);        if (mcp_status_arr[i]) goto out;
+        mcp_status_arr[i] = i2c_start(addr_to_write);     if (mcp_status_arr[i] == 1) goto out;
+        mcp_status_arr[i] = i2c_write(GPPUA);             if (mcp_status_arr[i] == 1) goto out;
+        mcp_status_arr[i] = i2c_write(0b00000000);        if (mcp_status_arr[i] == 1) goto out;
+        mcp_status_arr[i] = i2c_write(0b11111111);        if (mcp_status_arr[i] == 1) goto out;
 
         out:
             i2c_stop();

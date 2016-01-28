@@ -50,7 +50,7 @@ static void select_row(uint8_t row);
 
 static uint8_t mcp23018_reset_loop;
 
-static uint8_t mcp_status_array[8];
+static uint8_t mcp_status_array[8] = {1,1,1,1,1,1,1,1};
 
 #ifdef DEBUG_MATRIX_SCAN_RATE
 uint32_t matrix_timer;
@@ -82,8 +82,7 @@ void matrix_init(void)
 {
     // initialize row and col
 
-    init_mcp23018(mcp_status_array, sizeof mcp_status_array);
-
+    init_mcp23018(mcp_status_array);
 
     unselect_rows();
     init_cols();
@@ -107,17 +106,20 @@ void matrix_init(void)
 
 uint8_t matrix_scan(void)
 {
-    if (mcp23018_status) { // if there was an error
-        if (++mcp23018_reset_loop == 0) {
-            // since mcp23018_reset_loop is 8 bit - we'll try to reset once in 255 matrix scans
-            // this will be approx bit more frequent than once per second
-            print("trying to reset mcp23018\n");
-            init_mcp23018(mcp_status_array, sizeof mcp_status_array);
-            if (mcp23018_status) {
-                print("MCP23018 not responding\n");
-            } else {
-                print("MCP23018 ready\n");
-                ergodox_blink_all_leds();
+
+    for (uint8_t i=0; i<expanders_connected; i++) {
+        if (mcp_status_array[i] == 1) { // if there was an error
+            if (++mcp23018_reset_loop == 0) {
+                // since mcp23018_reset_loop is 8 bit - we'll try to reset once in 255 matrix scans
+                // this will be approx bit more frequent than once per second
+                print("trying to reset mcp23018\n");
+                init_mcp23018(mcp_status_array);
+                if (mcp_status_array[i] == 1) {
+                    print("MCP23018 not responding\n");
+                } else {
+                    print("MCP23018 ready\n");
+                    // ergodox_blink_all_leds();
+                }
             }
         }
     }
@@ -227,39 +229,87 @@ static void  init_cols(void)
     PORTD |=  (1<<5 | 1<<4);
 }
 
+static void select_mcp_row(uint8_t mcp_number, uint8_t row){
+    if (mcp_status_array[mcp_number] == 1) { // if there was an error
+        // do nothing
+    } else {
+        // set active row low  : 0
+        // set other rows hi-Z : 1
+            uint8_t addr_from_arr = i2c_addr_array[mcp_number];
+            uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
+            mcp_status_array[mcp_number] = i2c_start(addr_to_write);         
+            if (mcp_status_array[mcp_number] == 1) goto out2;
+            mcp_status_array[mcp_number] = i2c_write(GPIOA);                 
+            if (mcp_status_array[mcp_number] == 1) goto out2;
+            mcp_status_array[mcp_number] = i2c_write( 0xFF & ~(1<<row) & ~(0<<7) );                                
+            if (mcp_status_array[mcp_number] == 1) goto out2;
+    out2:
+        i2c_stop();
+    }
+}
+
+static matrix_row_t read_mcp_cols(uint8_t mcp_number, uint8_t row){
+    if (mcp_status_array[mcp_number] == 1) { 
+        // if there was an error
+        return 0;
+    } else {
+        uint8_t data = 0;
+        uint8_t addr_from_arr = i2c_addr_array[mcp_number];
+        uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
+        uint8_t addr_to_read = ( (addr_from_arr<<1) | 1 );
+        mcp_status_array[mcp_number] = i2c_start(addr_to_write);    
+        if (mcp_status_array[mcp_number] == 1) goto out;
+        mcp_status_array[mcp_number] = i2c_write(GPIOB);            
+        if (mcp_status_array[mcp_number] == 1) goto out;
+        mcp_status_array[mcp_number] = i2c_start(addr_to_read);     
+        if (mcp_status_array[mcp_number] == 1) goto out;
+        data = i2c_readNak();
+        data = ~data;
+    out:
+        i2c_stop();
+        return data;
+    }
+}
+
 static matrix_row_t read_cols(uint8_t row)
 {
-    if (row < 8) {
-        if (mcp23018_status) { // if there was an error
-            return 0;
-        } else {
-            uint8_t data = 0;
-            for (uint8_t i=0; i<expanders_connected; i++) {
-                uint8_t addr_from_arr = i2c_addr_array[i];
-                uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
-                uint8_t addr_to_read = ( (addr_from_arr<<1) | 1 );
-                mcp23018_status = i2c_start(addr_to_write);    if (mcp23018_status) goto out;
-                mcp23018_status = i2c_write(GPIOB);            if (mcp23018_status) goto out;
-                mcp23018_status = i2c_start(addr_to_read);     if (mcp23018_status) goto out;
-                data = i2c_readNak();
-                data = ~data;
-            }
-        out:
-            i2c_stop();
-            return data;
-        }
-    } else {
-        _delay_us(30);  // without this wait read unstable value.
-        // read from teensy
-        return
-            (PINF&(1<<0) ? 0 : (1<<0)) |
-            (PINF&(1<<1) ? 0 : (1<<1)) |
-            (PINF&(1<<4) ? 0 : (1<<2)) |
-            (PINF&(1<<5) ? 0 : (1<<3)) |
-            (PINF&(1<<6) ? 0 : (1<<4)) |
-            (PINF&(1<<7) ? 0 : (1<<5)) |
-            (PIND&(1<<4) ? 0 : (1<<6)) |
-            (PIND&(1<<5) ? 0 : (1<<7)) ;
+    switch (row) {
+        case 0 ... 7:
+            read_mcp_cols(0, row);
+            break;
+        case 8 ... 15:
+            _delay_us(30);  // without this wait read unstable value.
+            return
+                (PINF&(1<<0) ? 0 : (1<<0)) |
+                (PINF&(1<<1) ? 0 : (1<<1)) |
+                (PINF&(1<<4) ? 0 : (1<<2)) |
+                (PINF&(1<<5) ? 0 : (1<<3)) |
+                (PINF&(1<<6) ? 0 : (1<<4)) |
+                (PINF&(1<<7) ? 0 : (1<<5)) |
+                (PIND&(1<<4) ? 0 : (1<<6)) |
+                (PIND&(1<<5) ? 0 : (1<<7)) ;
+            break;
+        case 16 ... 23:
+            read_mcp_cols(1, row-16);
+            break;
+        case 24 ... 31:
+            read_mcp_cols(2, row-24);
+            break;
+        case 32 ... 39:
+            read_mcp_cols(3, row-32);
+            break;
+        case 40 ... 47:
+            read_mcp_cols(4, row-40);
+            break;
+        case 48 ... 55:
+            read_mcp_cols(5, row-48);
+            break;
+        case 56 ... 63:
+            read_mcp_cols(6, row-56);
+            break;
+        case 64 ... 71:
+            read_mcp_cols(7, row-64);
+            break;
     }
 }
 
@@ -306,22 +356,23 @@ static matrix_row_t read_cols(uint8_t row)
 static void unselect_rows(void)
 {
     // unselect on mcp23018
-    if (mcp23018_status) { // if there was an error
-        // do nothing
-    } else {
+    // if (mcp23018_status) { // if there was an error
+    //     // do nothing
+    // } else {
         // set all rows hi-Z : 1
         for (uint8_t i=0; i<expanders_connected; i++) {
             uint8_t addr_from_arr = i2c_addr_array[i];
             uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
-            mcp23018_status = i2c_start(addr_to_write);     if (mcp23018_status) goto out0;
-            mcp23018_status = i2c_write(GPIOA);             if (mcp23018_status) goto out0;
-            mcp23018_status = i2c_write( 0xFF
-                                & ~(0<<7)
-                            );                              if (mcp23018_status) goto out0;
+            mcp_status_array[i] = i2c_start(addr_to_write);     
+            if (mcp_status_array[i] == 1) goto out0;
+            mcp_status_array[i] = i2c_write(GPIOA);             
+            if (mcp_status_array[i] == 1) goto out0;
+            mcp_status_array[i] = i2c_write( 0xFF & ~(0<<7) );                              
+            if (mcp_status_array[i] == 1) goto out0;
+            out0:
+                i2c_stop();
         }
-    out0:
-        i2c_stop();
-    }
+    // }
 
     // unselect on teensy
     // Hi-Z(DDR:0, PORT:0) to unselect
@@ -336,26 +387,9 @@ static void unselect_rows(void)
 static void select_row(uint8_t row)
 {
     switch (row) {
-        // select on mcp23018
         case 0 ... 7:
-            if (mcp23018_status) { // if there was an error
-                // do nothing
-            } else {
-                // set active row low  : 0
-                // set other rows hi-Z : 1
-                    uint8_t addr_from_arr = i2c_addr_array[0];
-                    uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
-                    mcp23018_status = i2c_start(addr_to_write);         
-                    if (mcp23018_status) goto out1;
-                    mcp23018_status = i2c_write(GPIOA);                 
-                    if (mcp23018_status) goto out1;
-                    mcp23018_status = i2c_write( 0xFF & ~(1<<row) & ~(0<<7) );                                
-                    if (mcp23018_status) goto out1;
-            out1:
-                i2c_stop();
-            }
+            select_mcp_row(0,row);
             break;
-        // select on teensy
         // Output low(DDR:1, PORT:0) to select
         case 8:
             DDRB  |= (1<<0);
@@ -390,22 +424,25 @@ static void select_row(uint8_t row)
             PORTC &= ~(1<<7);
             break;
         case 16 ... 23:
-            if (mcp23018_status) { // if there was an error
-                // do nothing
-            } else {
-                // set active row low  : 0
-                // set other rows hi-Z : 1
-                    uint8_t addr_from_arr = i2c_addr_array[1];
-                    uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
-                    mcp23018_status = i2c_start(addr_to_write);         
-                    if (mcp23018_status) goto out2;
-                    mcp23018_status = i2c_write(GPIOA);                 
-                    if (mcp23018_status) goto out2;
-                    mcp23018_status = i2c_write( 0xFF & ~(1<<row) & ~(0<<7) );                                
-                    if (mcp23018_status) goto out2;
-            out2:
-                i2c_stop();
-            }
+            select_mcp_row(1,row-16);
+            break;
+        case 24 ... 31:
+            select_mcp_row(2,row-24);
+            break;
+        case 32 ... 39:
+            select_mcp_row(3,row-32);
+            break;
+        case 40 ... 47:
+            select_mcp_row(4,row-40);
+            break;
+        case 48 ... 55:
+            select_mcp_row(5,row-48);
+            break;
+        case 56 ... 63:
+            select_mcp_row(6,row-56);
+            break;
+        case 64 ... 71:
+            select_mcp_row(7,row-64);
             break;
     }
 }
