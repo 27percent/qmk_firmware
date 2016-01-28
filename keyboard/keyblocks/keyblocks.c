@@ -1,4 +1,4 @@
-#include "ergodox_ez.h"
+#include "keyblocks.h"
 #include "i2cmaster.h"
 
 bool i2c_initialized = 0;
@@ -50,24 +50,24 @@ void * matrix_scan_kb(void) {
 };
 
 
-void ergodox_blink_all_leds(void)
+void keyblocks_blink_all_leds(void)
 {
-    ergodox_led_all_off();
-    ergodox_led_all_set(LED_BRIGHTNESS_HI);
-    ergodox_right_led_1_on();
+    keyblocks_led_all_off();
+    keyblocks_led_all_set(LED_BRIGHTNESS_HI);
+    keyblocks_right_led_1_on();
     _delay_ms(50);
-    ergodox_right_led_2_on();
+    keyblocks_right_led_2_on();
     _delay_ms(50);
-    ergodox_right_led_3_on();
+    keyblocks_right_led_3_on();
     _delay_ms(50);
-    ergodox_right_led_1_off();
+    keyblocks_right_led_1_off();
     _delay_ms(50);
-    ergodox_right_led_2_off();
+    keyblocks_right_led_2_off();
     _delay_ms(50);
-    ergodox_right_led_3_off();
-    //ergodox_led_all_on();
+    keyblocks_right_led_3_off();
+    //keyblocks_led_all_on();
     //_delay_ms(333);
-    ergodox_led_all_off();
+    keyblocks_led_all_off();
 }
 
 void init_mcp23018(uint8_t *mcp_status_arr) {
@@ -90,7 +90,7 @@ void init_mcp23018(uint8_t *mcp_status_arr) {
         if (mcp_status_arr[expanders_connected] == 0) {
             i2c_addr_array[expanders_connected] = test_addr;
             expanders_connected++;
-            // ergodox_blink_all_leds();
+            // keyblocks_blink_all_leds();
             // _delay_ms(50);
         }
     } 

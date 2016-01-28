@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "debug.h"
 #include "util.h"
 #include "matrix.h"
-#include "ergodox_ez.h"
+#include "keyblocks.h"
 #include "i2cmaster.h"
 #ifdef DEBUG_MATRIX_SCAN_RATE
 #include  "timer.h"
@@ -160,7 +160,7 @@ uint8_t matrix_scan(void)
                     print("MCP23018 not responding\n");
                 } else {
                     print("MCP23018 ready\n");
-                    // ergodox_blink_all_leds();
+                    // keyblocks_blink_all_leds();
                 }
             }
         }
@@ -323,7 +323,7 @@ static matrix_row_t read_cols(uint8_t row)
  * row: 8   9   10  11  12  13  14  15
  * pin: A0  A1  A2  A3  A4  A5  A6  A7
  *
- * MCP23018 @ 0x21
+ * MCP23018 @ 0x21 - ACTIVE
  * row: 16  17  18  19  20  21  22  23
  * pin: A0  A1  A2  A3  A4  A5  A6  A7
  *
@@ -356,23 +356,23 @@ static matrix_row_t read_cols(uint8_t row)
 static void unselect_rows(void)
 {
     // unselect on mcp23018
-    // if (mcp23018_status) { // if there was an error
-    //     // do nothing
-    // } else {
-        // set all rows hi-Z : 1
-        for (uint8_t i=0; i<expanders_connected; i++) {
+    // set all rows hi-Z : 1
+    for (uint8_t i=0; i<expanders_connected; i++) {
+        if (mcp_status_array[i] == 1) { // if there was an error
+        // do nothing
+        } else {
             uint8_t addr_from_arr = i2c_addr_array[i];
             uint8_t addr_to_write = ( (addr_from_arr<<1) | 0 );
             mcp_status_array[i] = i2c_start(addr_to_write);     
             if (mcp_status_array[i] == 1) goto out0;
             mcp_status_array[i] = i2c_write(GPIOA);             
             if (mcp_status_array[i] == 1) goto out0;
-            mcp_status_array[i] = i2c_write( 0xFF & ~(0<<7) );                              
+            mcp_status_array[i] = i2c_write( 0xFF & ~(0<<7) );
             if (mcp_status_array[i] == 1) goto out0;
             out0:
                 i2c_stop();
         }
-    // }
+    }
 
     // unselect on teensy
     // Hi-Z(DDR:0, PORT:0) to unselect

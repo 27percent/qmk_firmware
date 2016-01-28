@@ -1,5 +1,5 @@
-#ifndef ERGODOX_EZ_H
-#define ERGODOX_EZ_H
+#ifndef KEYBLOCKS_H
+#define KEYBLOCKS_H
 
 #include "matrix.h"
 #include "keymap_common.h"
@@ -27,57 +27,57 @@ extern uint8_t i2c_addr_array[8];
 #define OLATA           0x14            // output latch register
 #define OLATB           0x15
 
-void init_ergodox(void);
-void ergodox_blink_all_leds(void);
+void init_keyblocks(void);
+void keyblocks_blink_all_leds(void);
 void init_mcp23018(uint8_t *mcp_status_arr);
-uint8_t ergodox_left_leds_update(void);
+uint8_t keyblocks_left_leds_update(void);
 
 #define LED_BRIGHTNESS_LO       15
 #define LED_BRIGHTNESS_HI       255
 
 
-inline void ergodox_board_led_on(void)      { DDRD |=  (1<<6); PORTD |=  (1<<6); }
-inline void ergodox_right_led_1_on(void)    { DDRB |=  (1<<5); PORTB |=  (1<<5); }
-inline void ergodox_right_led_2_on(void)    { DDRB |=  (1<<6); PORTB |=  (1<<6); }
-inline void ergodox_right_led_3_on(void)    { DDRB |=  (1<<7); PORTB |=  (1<<7); }
-inline void ergodox_right_led_on(uint8_t led) { DDRB |= (1<<(led+4)); PORTB |= (1<<(led+4)); }
+inline void keyblocks_board_led_on(void)      { DDRD |=  (1<<6); PORTD |=  (1<<6); }
+inline void keyblocks_right_led_1_on(void)    { DDRB |=  (1<<5); PORTB |=  (1<<5); }
+inline void keyblocks_right_led_2_on(void)    { DDRB |=  (1<<6); PORTB |=  (1<<6); }
+inline void keyblocks_right_led_3_on(void)    { DDRB |=  (1<<7); PORTB |=  (1<<7); }
+inline void keyblocks_right_led_on(uint8_t led) { DDRB |= (1<<(led+4)); PORTB |= (1<<(led+4)); }
 
-inline void ergodox_board_led_off(void)     { DDRD &= ~(1<<6); PORTD &= ~(1<<6); }
-inline void ergodox_right_led_1_off(void)   { DDRB &= ~(1<<5); PORTB &= ~(1<<5); }
-inline void ergodox_right_led_2_off(void)   { DDRB &= ~(1<<6); PORTB &= ~(1<<6); }
-inline void ergodox_right_led_3_off(void)   { DDRB &= ~(1<<7); PORTB &= ~(1<<7); }
-inline void ergodox_right_led_off(uint8_t led) { DDRB &= ~(1<<(led+4)); PORTB &= ~(1<<(led+4)); }
+inline void keyblocks_board_led_off(void)     { DDRD &= ~(1<<6); PORTD &= ~(1<<6); }
+inline void keyblocks_right_led_1_off(void)   { DDRB &= ~(1<<5); PORTB &= ~(1<<5); }
+inline void keyblocks_right_led_2_off(void)   { DDRB &= ~(1<<6); PORTB &= ~(1<<6); }
+inline void keyblocks_right_led_3_off(void)   { DDRB &= ~(1<<7); PORTB &= ~(1<<7); }
+inline void keyblocks_right_led_off(uint8_t led) { DDRB &= ~(1<<(led+4)); PORTB &= ~(1<<(led+4)); }
 
-inline void ergodox_led_all_on(void)
+inline void keyblocks_led_all_on(void)
 {
-    ergodox_board_led_on();
-    ergodox_right_led_1_on();
-    ergodox_right_led_2_on();
-    ergodox_right_led_3_on();
+    keyblocks_board_led_on();
+    keyblocks_right_led_1_on();
+    keyblocks_right_led_2_on();
+    keyblocks_right_led_3_on();
 }
 
-inline void ergodox_led_all_off(void)
+inline void keyblocks_led_all_off(void)
 {
-    ergodox_board_led_off();
-    ergodox_right_led_1_off();
-    ergodox_right_led_2_off();
-    ergodox_right_led_3_off();
+    keyblocks_board_led_off();
+    keyblocks_right_led_1_off();
+    keyblocks_right_led_2_off();
+    keyblocks_right_led_3_off();
 }
 
-inline void ergodox_right_led_1_set(uint8_t n)    { OCR1A = n; }
-inline void ergodox_right_led_2_set(uint8_t n)    { OCR1B = n; }
-inline void ergodox_right_led_3_set(uint8_t n)    { OCR1C = n; }
-inline void ergodox_right_led_set(uint8_t led, uint8_t n)  {
+inline void keyblocks_right_led_1_set(uint8_t n)    { OCR1A = n; }
+inline void keyblocks_right_led_2_set(uint8_t n)    { OCR1B = n; }
+inline void keyblocks_right_led_3_set(uint8_t n)    { OCR1C = n; }
+inline void keyblocks_right_led_set(uint8_t led, uint8_t n)  {
     (led == 1) ? (OCR1A = n) :
     (led == 2) ? (OCR1B = n) :
                  (OCR1C = n);
 }
 
-inline void ergodox_led_all_set(uint8_t n)
+inline void keyblocks_led_all_set(uint8_t n)
 {
-    ergodox_right_led_1_set(n);
-    ergodox_right_led_2_set(n);
-    ergodox_right_led_3_set(n);
+    keyblocks_right_led_1_set(n);
+    keyblocks_right_led_2_set(n);
+    keyblocks_right_led_3_set(n);
 }
 
 #define KEYMAP( \
