@@ -1,3 +1,4 @@
+keyboard/planck/dfu-programmer.exe
 .dep
 *.o
 *.eep
@@ -13,3 +14,10 @@ tags
 build/
 *.bak
 .vagrant/
+.DS_STORE
+
+# Eclipse Settings
+.cproject
+.project
+.settings/
+
